@@ -3,6 +3,14 @@ defmodule SnarkyWeb.DashboardLive do
 
   @tick_interval 250
 
+  @snark [
+    "I'm listening. Don't waste it.",
+    "Go ahead, I'm not getting any younger.",
+    "Snarky is judging your gain staging.",
+    "Talk to me. Or don't. I'll just sit here.",
+    "Ready when you are. No rush. Seriously."
+  ]
+
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do
@@ -25,6 +33,7 @@ defmodule SnarkyWeb.DashboardLive do
       |> assign(:command_log, [])
       |> assign(:mcu_connected, false)
       |> assign(:mic_active, false)
+      |> assign(:snark, Enum.random(@snark))
 
     {:ok, socket}
   end
@@ -151,86 +160,88 @@ defmodule SnarkyWeb.DashboardLive do
 
       <!-- Transport Bar -->
       <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--surface-alt);">
-        <div style="display: flex; gap: 6px;">
-          <button phx-click="transport" phx-value-action="rewind" style={transport_btn()}>⏮</button>
-          <button phx-click="transport" phx-value-action="stop" style={transport_btn()}>⏹</button>
-          <button phx-click="transport" phx-value-action="play" style={transport_btn() <> "background: var(--surface-alt);"}>▶</button>
-          <button phx-click="transport" phx-value-action="record" style={transport_btn() <> "background: var(--armed); color: white;"}>⏺</button>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <img src="/images/snarky.png" style="width: 48px; height: 48px; border-radius: 8px;" />
+          <button phx-click="transport" phx-value-action="rewind" class="transport-btn">⏮</button>
+          <button phx-click="transport" phx-value-action="stop" class="transport-btn">⏹</button>
+          <button phx-click="transport" phx-value-action="play" class="transport-btn play-btn">▶</button>
+          <button phx-click="transport" phx-value-action="record" class="transport-btn record-btn">⏺</button>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <div style="font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums;">
-            <%= @tempo %> BPM
+        <div style="display: flex; align-items: center; gap: 20px;">
+          <div style="font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--cream); letter-spacing: -0.5px;">
+            <%= @tempo %>
           </div>
-
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <div style={"width: 8px; height: 8px; border-radius: 50%; background: #{if @mcu_connected, do: "var(--green)", else: "var(--accent)"};"} />
-            <span style="font-size: 10px; color: var(--text-dim);">MCU</span>
-          </div>
+          <span style="font-size: 11px; color: var(--text-dim); font-weight: 600;">BPM</span>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <button phx-click="toggle_mic" style={"border: none; background: #{if @mic_active, do: "var(--armed)", else: "var(--bg)"}; color: #{if @mic_active, do: "white", else: "var(--text-dim)"}; font-size: 16px; width: 40px; height: 36px; border-radius: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent;"}>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <span class={"status-dot #{if @mcu_connected, do: "connected", else: "disconnected"}"} />
+            <span style="font-size: 9px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">MCU</span>
+          </div>
+
+          <button phx-click="toggle_mic" class={"mic-btn #{if @mic_active, do: "active", else: "inactive"}"}>
             🎤
           </button>
-          <div style={"font-size: 11px; color: #{if @listening, do: "var(--accent)", else: "var(--text-dim)"};"}>
-            <%= if @listening, do: "● Listening", else: "○ Idle" %>
+
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <span class={"status-dot #{if @listening, do: "listening", else: "idle"}"} />
+            <span style="font-size: 9px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+              <%= if @listening, do: "HOT", else: "IDLE" %>
+            </span>
           </div>
         </div>
       </div>
 
       <!-- Channel Strips + Master -->
-      <div style="flex: 1; display: flex; gap: 2px; padding: 8px; overflow: hidden;">
-        <!-- 8 Channel Strips -->
-        <div style="flex: 1; display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px;">
+      <div style="flex: 1; display: flex; gap: 4px; padding: 8px; overflow: hidden;">
+        <div style="flex: 1; display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px;">
           <%= for n <- 1..8 do %>
             <.channel_strip track={Map.get(@tracks, n, default_track(n))} number={n} />
           <% end %>
         </div>
 
-        <!-- Master Fader -->
-        <div style="width: 64px; display: flex; flex-direction: column; background: var(--surface-alt); border-radius: 8px; padding: 8px; gap: 6px;">
-          <div style="text-align: center; font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px;">
+        <!-- Master -->
+        <div class="master-strip">
+          <div style="text-align: center; font-size: 9px; font-weight: 800; color: var(--burnt-orange); text-transform: uppercase; letter-spacing: 2px;">
             MST
           </div>
-          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; padding: 4px 0;">
-            <div style="width: 12px; height: 100%; background: var(--bg); border-radius: 4px; position: relative; overflow: hidden;">
-              <div style="position: absolute; bottom: 0; width: 100%; height: 70%; background: var(--teal); border-radius: 4px; transition: height 0.2s;" />
+          <div class="meter-well">
+            <div class="meter-bar" style="width: 10px;">
+              <div class="meter-fill" style="height: 70%; background: var(--teal);" />
             </div>
           </div>
-          <div style="text-align: center; font-size: 11px; font-variant-numeric: tabular-nums; color: var(--text-dim);">
-            0 dB
-          </div>
+          <div class="track-value">0 dB</div>
         </div>
       </div>
 
       <!-- Command Log -->
-      <div style="height: 100px; background: var(--surface); border-top: 1px solid var(--surface-alt); padding: 6px 16px; overflow-y: auto;">
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-          <span style="font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px;">
-            Log
-          </span>
-          <%= if @last_heard do %>
-            <span style="font-size: 11px; color: var(--accent); font-style: italic;">
-              "<%= @last_heard %>"
-            </span>
-          <% end %>
-        </div>
+      <div style="height: 90px; background: var(--surface); border-top: 1px solid var(--surface-alt); padding: 6px 16px; overflow-y: auto;">
+        <%= if @command_log == [] do %>
+          <div style="font-size: 11px; color: var(--text-dim); font-style: italic; padding: 4px 0;">
+            <%= @snark %>
+          </div>
+        <% end %>
+        <%= if @last_heard do %>
+          <div style="font-size: 11px; color: var(--burnt-orange); padding: 2px 0; font-style: italic;">
+            "<%= @last_heard %>"
+          </div>
+        <% end %>
         <%= for entry <- @command_log do %>
-          <div style="font-size: 11px; color: var(--text-dim); padding: 1px 0; font-variant-numeric: tabular-nums;">
+          <div class="log-entry">
             <span style="color: var(--teal);"><%= Calendar.strftime(entry.time, "%H:%M:%S") %></span>
-            <span style="color: var(--text);"><%= entry.text %></span>
+            <span style="color: var(--cream-dim);">→</span>
+            <span style="color: var(--cream);"><%= entry.text %></span>
           </div>
         <% end %>
       </div>
     </div>
 
     <script>
-      // iPad mic capture
       (function() {
-        let mediaRecorder = null;
-        let audioContext = null;
         let stream = null;
+        let audioContext = null;
 
         window.addEventListener("phx:toggle_mic", async (e) => {
           const active = e.detail.active;
@@ -244,7 +255,7 @@ defmodule SnarkyWeb.DashboardLive do
               const processor = audioContext.createScriptProcessor(4096, 1, 1);
 
               let buffer = [];
-              const CHUNK_SIZE = 16000 * 5; // 5 seconds
+              const CHUNK_SIZE = 16000 * 5;
 
               processor.onaudioprocess = (e) => {
                 const input = e.inputBuffer.getChannelData(0);
@@ -282,58 +293,44 @@ defmodule SnarkyWeb.DashboardLive do
 
   defp channel_strip(assigns) do
     ~H"""
-    <div style="display: flex; flex-direction: column; background: var(--surface); border-radius: 8px; padding: 8px; gap: 4px;">
-      <div style="text-align: center; font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-        <%= @track.name %>
-      </div>
+    <div class="channel-strip">
+      <div class="track-name"><%= @track.name %></div>
 
-      <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; padding: 4px 0;">
-        <div style="width: 6px; height: 100%; background: var(--bg); border-radius: 3px; position: relative; overflow: hidden;">
-          <div style={"position: absolute; bottom: 0; width: 100%; height: #{meter_height(@track.volume_db)}%; background: #{meter_color(@track.volume_db)}; border-radius: 3px; transition: height 0.2s;"} />
+      <div class="meter-well">
+        <div class="meter-bar">
+          <div
+            class="meter-fill"
+            style={"height: #{meter_height(@track.volume_db)}%; background: #{meter_color(@track.volume_db)};"}
+          />
         </div>
       </div>
 
-      <div style="text-align: center; font-size: 10px; font-variant-numeric: tabular-nums; color: var(--text-dim);">
-        <%= @track.volume_db %> dB
-      </div>
-
-      <div style="text-align: center; font-size: 9px; color: var(--text-dim);">
-        <%= format_pan(@track.pan) %>
-      </div>
+      <div class="track-value"><%= @track.volume_db %></div>
+      <div class="track-value" style="font-size: 9px;"><%= format_pan(@track.pan) %></div>
 
       <div style="display: flex; gap: 3px;">
         <button
           phx-click="track_action"
           phx-value-track={@number}
           phx-value-action={if @track.muted, do: "unmute", else: "mute"}
-          style={track_btn(@track.muted, "var(--muted)")}
+          class={"track-btn #{if @track.muted, do: "muted", else: "off"}"}
         >M</button>
         <button
           phx-click="track_action"
           phx-value-track={@number}
           phx-value-action={if @track.soloed, do: "unsolo", else: "solo"}
-          style={track_btn(@track.soloed, "var(--soloed)")}
+          class={"track-btn #{if @track.soloed, do: "soloed", else: "off"}"}
         >S</button>
         <button
           phx-click="track_action"
           phx-value-track={@number}
           phx-value-action={if @track.armed, do: "disarm", else: "arm"}
-          style={track_btn(@track.armed, "var(--armed)")}
+          class={"track-btn #{if @track.armed, do: "armed", else: "off"}"}
+          data-armed={to_string(@track.armed)}
         >R</button>
       </div>
     </div>
     """
-  end
-
-  defp transport_btn do
-    "border: none; background: var(--bg); color: var(--text); font-size: 18px; width: 44px; height: 36px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent;"
-  end
-
-  defp track_btn(active, color) do
-    bg = if active, do: color, else: "var(--bg)"
-    text_color = if active, do: "white", else: "var(--text-dim)"
-
-    "flex: 1; border: none; background: #{bg}; color: #{text_color}; font-size: 10px; font-weight: 700; padding: 5px 0; border-radius: 4px; cursor: pointer; -webkit-tap-highlight-color: transparent;"
   end
 
   defp default_track(n) do

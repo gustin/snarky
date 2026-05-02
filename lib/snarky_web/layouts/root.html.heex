@@ -6,26 +6,40 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Snarky" />
+    <link rel="apple-touch-icon" href="/images/snarky.png" />
     <title>Snarky</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
 
       :root {
-        --bg: #1a1a2e;
-        --surface: #16213e;
-        --surface-alt: #0f3460;
-        --accent: #e94560;
-        --accent-alt: #f5a623;
-        --teal: #53868b;
-        --green: #4caf50;
-        --text: #e8e8e8;
-        --text-dim: #8892a4;
-        --armed: #e94560;
-        --muted: #f5a623;
-        --soloed: #4caf50;
-        --meter-low: #4caf50;
-        --meter-mid: #f5a623;
-        --meter-high: #e94560;
+        --bg: #1c1914;
+        --surface: #2a2319;
+        --surface-alt: #3d3226;
+        --surface-lit: #4a3d2e;
+
+        --burnt-orange: #c9663a;
+        --teal: #4a8b8d;
+        --mustard: #d4a233;
+        --plum: #7a3b4e;
+        --cream: #f0e6d3;
+        --cream-dim: #a89880;
+
+        --armed: #c9663a;
+        --muted: #d4a233;
+        --soloed: #4a8b8d;
+
+        --meter-low: #4a8b8d;
+        --meter-mid: #d4a233;
+        --meter-high: #c9663a;
+
+        --text: #f0e6d3;
+        --text-dim: #8a7d6e;
+        --text-bright: #fff5e6;
+      }
+
+      @font-face {
+        font-family: 'Snarky';
+        src: local('SF Mono'), local('Menlo'), local('Monaco');
       }
 
       body {
@@ -38,6 +52,199 @@
         -webkit-touch-callout: none;
         -webkit-user-select: none;
         user-select: none;
+      }
+
+      button {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+
+      button:active {
+        transform: scale(0.95);
+        transition: transform 0.05s;
+      }
+
+      .channel-strip {
+        display: flex;
+        flex-direction: column;
+        background: var(--surface);
+        border-radius: 10px;
+        padding: 10px 8px;
+        gap: 5px;
+        border: 1px solid var(--surface-alt);
+        transition: border-color 0.2s;
+      }
+
+      .channel-strip:has(button[data-armed="true"]) {
+        border-color: var(--armed);
+      }
+
+      .track-name {
+        text-align: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .meter-well {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        padding: 6px 0;
+      }
+
+      .meter-bar {
+        width: 6px;
+        height: 100%;
+        background: var(--bg);
+        border-radius: 3px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .meter-fill {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        border-radius: 3px;
+        transition: height 0.15s ease-out;
+      }
+
+      .track-value {
+        text-align: center;
+        font-size: 10px;
+        font-variant-numeric: tabular-nums;
+        color: var(--text-dim);
+        font-family: 'SF Mono', Menlo, monospace;
+      }
+
+      .track-btn {
+        flex: 1;
+        border: 1px solid transparent;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 6px 0;
+        border-radius: 5px;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+        transition: all 0.1s;
+      }
+
+      .track-btn.off {
+        background: var(--bg);
+        color: var(--text-dim);
+        border-color: var(--surface-alt);
+      }
+
+      .track-btn.muted {
+        background: var(--muted);
+        color: var(--bg);
+        border-color: var(--muted);
+      }
+
+      .track-btn.soloed {
+        background: var(--soloed);
+        color: var(--bg);
+        border-color: var(--soloed);
+      }
+
+      .track-btn.armed {
+        background: var(--armed);
+        color: var(--text-bright);
+        border-color: var(--armed);
+      }
+
+      .transport-btn {
+        border: 1px solid var(--surface-alt);
+        background: var(--surface);
+        color: var(--text);
+        font-size: 18px;
+        width: 48px;
+        height: 40px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .transport-btn:active {
+        background: var(--surface-lit);
+      }
+
+      .transport-btn.record-btn {
+        background: var(--armed);
+        color: var(--text-bright);
+        border-color: var(--armed);
+      }
+
+      .transport-btn.play-btn {
+        background: var(--surface-alt);
+        border-color: var(--teal);
+      }
+
+      .log-entry {
+        font-size: 11px;
+        padding: 2px 0;
+        font-family: 'SF Mono', Menlo, monospace;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .status-dot.connected { background: var(--teal); }
+      .status-dot.disconnected { background: var(--armed); animation: pulse 2s infinite; }
+      .status-dot.listening { background: var(--armed); animation: pulse 1s infinite; }
+      .status-dot.idle { background: var(--text-dim); }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+
+      .mic-btn {
+        border: 1px solid var(--surface-alt);
+        font-size: 16px;
+        width: 44px;
+        height: 40px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .mic-btn.active {
+        background: var(--armed);
+        border-color: var(--armed);
+        animation: pulse 1.5s infinite;
+      }
+
+      .mic-btn.inactive {
+        background: var(--surface);
+        color: var(--text-dim);
+      }
+
+      .master-strip {
+        width: 70px;
+        display: flex;
+        flex-direction: column;
+        background: var(--surface-alt);
+        border-radius: 10px;
+        padding: 10px 8px;
+        gap: 5px;
+        border: 1px solid var(--surface-lit);
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/phoenix@1.7.20/priv/static/phoenix.min.js"></script>
