@@ -28,3 +28,6 @@ snarky-*.tar
 # Audio temp files
 /tmp/audio/
 
+# Planning docs (local working notes)
+/docs/plans/
+
