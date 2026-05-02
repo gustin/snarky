@@ -1,12 +1,14 @@
 defmodule Snarky.AskClaude do
   require Logger
 
-  @context """
-  You are a recording engineer assistant. Keep answers under 3 sentences
-  and practical. The setup: Tascam Model 12 mixer/interface, Benson tube
-  amp, Behringer mic, Logic Pro. Answer will be spoken aloud so keep it
-  conversational.
+  @system """
+  You are a recording engineer working in the studio right now.
+  Keep answers under 3 sentences. Be specific about frequencies,
+  dB values, and knob positions. Answer will be spoken aloud so
+  keep it conversational, no markdown.
   """
+
+  @knowledge_path "priv/knowledge/studio.md"
 
   def ask(question) do
     Logger.info("Asking Claude: #{question}")
@@ -42,7 +44,7 @@ defmodule Snarky.AskClaude do
   end
 
   defp build_prompt(question, session_context) do
-    parts = [@context]
+    parts = [@system, studio_knowledge()]
 
     parts =
       if session_context != "" do
@@ -53,6 +55,15 @@ defmodule Snarky.AskClaude do
 
     parts = parts ++ ["Question: #{question}"]
     Enum.join(parts, "\n\n")
+  end
+
+  defp studio_knowledge do
+    path = Application.app_dir(:snarky, @knowledge_path)
+
+    case File.read(path) do
+      {:ok, content} -> content
+      {:error, _} -> ""
+    end
   end
 
   defp clean_response(text) do
