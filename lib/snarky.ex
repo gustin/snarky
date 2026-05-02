@@ -1,18 +1,13 @@
 defmodule Snarky do
-  @moduledoc """
-  Documentation for `Snarky`.
-  """
+  @moduledoc false
 
-  @doc """
-  Hello world.
+  def start do
+    Snarky.Speaker.say("Snarky is listening")
+    Snarky.Listener.start_listening()
+  end
 
-  ## Examples
-
-      iex> Snarky.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  def stop do
+    Snarky.Listener.stop_listening()
+    Snarky.Speaker.say("Snarky out")
   end
 end
