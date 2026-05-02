@@ -24,6 +24,7 @@ defmodule Snarky.MixProject do
       {:bumblebee, "~> 0.6"},
       {:exla, "~> 0.9"},
       {:ortex, "~> 0.1"},
+      {:midiex, "~> 0.6"},
       {:ex_osc, "~> 0.1"},
       {:jason, "~> 1.4"},
       {:nx, "~> 0.9"}
