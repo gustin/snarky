@@ -17,7 +17,9 @@ defmodule Snarky.AskClaude do
 
     task =
       Task.async(fn ->
-        System.cmd(claude_bin, ["-p", prompt], stderr_to_stdout: true)
+        System.cmd("sh", ["-c", "#{claude_bin} -p #{escape(prompt)} < /dev/null"],
+          stderr_to_stdout: true
+        )
       end)
 
     case Task.await(task, 30_000) do
@@ -56,11 +58,16 @@ defmodule Snarky.AskClaude do
   defp clean_response(text) do
     text
     |> String.trim()
+    |> String.replace(~r/^Warning:.*$/m, "")
     |> String.replace(~r/\*\*(.+?)\*\*/, "\\1")
     |> String.replace(~r/`(.+?)`/, "\\1")
     |> String.replace(~r/^#+\s+/m, "")
     |> String.replace(~r/^\s*[-*]\s+/m, "")
     |> String.replace(~r/\n+/, " ")
     |> String.trim()
+  end
+
+  defp escape(str) do
+    "'" <> String.replace(str, "'", "'\\''") <> "'"
   end
 end
