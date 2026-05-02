@@ -22,3 +22,9 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 snarky-*.tar
 
+# Whisper model files (large binaries)
+/priv/models/*.bin
+
+# Audio temp files
+/tmp/audio/
+
