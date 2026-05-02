@@ -170,6 +170,7 @@ defmodule Snarky.Listener do
 
       {:ok, text} ->
         Logger.info("Heard: #{text}")
+        Phoenix.PubSub.broadcast(Snarky.PubSub, "listener", {:heard, text})
         process_transcription(text, state)
 
       {:error, reason} ->

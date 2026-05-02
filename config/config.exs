@@ -24,3 +24,14 @@ config :snarky,
   }
 
 config :nx, :default_backend, EXLA.Backend
+
+config :snarky, SnarkyWeb.Endpoint,
+  url: [host: "0.0.0.0"],
+  http: [ip: {0, 0, 0, 0}, port: 4422],
+  server: true,
+  secret_key_base: String.duplicate("snarky", 11),
+  live_view: [signing_salt: "snarky_lv"],
+  pubsub_server: Snarky.PubSub,
+  render_errors: [formats: [html: SnarkyWeb.ErrorHTML]]
+
+import_config "#{config_env()}.exs"

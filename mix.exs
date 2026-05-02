@@ -21,6 +21,11 @@ defmodule Snarky.MixProject do
 
   defp deps do
     [
+      {:phoenix, "~> 1.7"},
+      {:phoenix_live_view, "~> 1.0"},
+      {:phoenix_html, "~> 4.2"},
+      {:phoenix_pubsub, "~> 2.1"},
+      {:plug_cowboy, "~> 2.7"},
       {:bumblebee, "~> 0.6"},
       {:exla, "~> 0.9"},
       {:ortex, "~> 0.1"},

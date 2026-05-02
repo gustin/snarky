@@ -61,6 +61,7 @@ defmodule Snarky.Session do
   @impl true
   def handle_cast({:track_command, cmd}, state) do
     new_state = apply_command(cmd, state)
+    Phoenix.PubSub.broadcast(Snarky.PubSub, "session", {:session_updated, new_state})
     {:noreply, new_state}
   end
 

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Snarky" />
+    <title>Snarky</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      :root {
+        --bg: #1a1a2e;
+        --surface: #16213e;
+        --surface-alt: #0f3460;
+        --accent: #e94560;
+        --accent-alt: #f5a623;
+        --teal: #53868b;
+        --green: #4caf50;
+        --text: #e8e8e8;
+        --text-dim: #8892a4;
+        --armed: #e94560;
+        --muted: #f5a623;
+        --soloed: #4caf50;
+        --meter-low: #4caf50;
+        --meter-mid: #f5a623;
+        --meter-high: #e94560;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        overflow: hidden;
+        height: 100vh;
+        height: 100dvh;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/phoenix@1.7.20/priv/static/phoenix.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phoenix_live_view@1.0.12/priv/static/phoenix_live_view.min.js"></script>
+  </head>
+  <body>
+    <%= @inner_content %>
+    <script>
+      let liveSocket = new window.LiveView.LiveSocket("/live", window.Phoenix.Socket)
+      liveSocket.connect()
+    </script>
+  </body>
+</html>

@@ -23,6 +23,7 @@ defmodule Snarky.Executor do
       {:ok, message} ->
         Snarky.Speaker.say(message)
         Snarky.Session.track_command(cmd)
+        Phoenix.PubSub.broadcast(Snarky.PubSub, "commands", {:command, cmd.action, message})
         :ok
 
       {:error, reason} ->
