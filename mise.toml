@@ -1,0 +1,27 @@
+[tools]
+erlang = "27"
+elixir = "1.19"
+
+[tasks.setup]
+description = "Install deps and verify environment"
+run = ["mix deps.get", "mix snarky.setup"]
+
+[tasks.start]
+description = "Start Snarky"
+run = "mix snarky"
+
+[tasks.test]
+description = "Run test suite"
+run = "mix test"
+
+[tasks.fmt]
+description = "Format code"
+run = "mix format"
+
+[tasks.check]
+description = "Compile with warnings as errors and check format"
+run = ["mix compile --warnings-as-errors", "mix format --check-formatted", "mix test"]
+
+[tasks."model:download"]
+description = "Download Whisper base.en model"
+run = "curl -L https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin -o priv/models/ggml-base.en.bin"
