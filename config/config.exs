@@ -1,12 +1,9 @@
 import Config
 
 config :snarky,
-  whisper_model:
-    System.get_env("SNARKY_WHISPER_MODEL") ||
-      Path.join(File.cwd!(), "priv/models/ggml-base.en.bin"),
-  whisper_bin:
-    System.get_env("SNARKY_WHISPER_BIN") || "/opt/homebrew/opt/whisper-cpp/bin/whisper-cli",
+  stt_model: "distil-whisper/distil-large-v3",
   ffmpeg_bin: System.get_env("SNARKY_FFMPEG_BIN") || "ffmpeg",
+  audio_device: "MacBook Pro Microphone",
   claude_bin: System.get_env("SNARKY_CLAUDE_BIN") || "claude",
   osc_host: {127, 0, 0, 1},
   osc_port: 8000,
@@ -14,10 +11,6 @@ config :snarky,
   wake_word: "hey snarky",
   voice: "Samantha",
   speech_rate: 200,
-  audio_device: :default,
-  silence_threshold_db: -30,
-  silence_duration_ms: 1500,
-  max_phrase_ms: 15_000,
   track_aliases: %{
     "guitar" => 1,
     "bass" => 2,
@@ -28,3 +21,5 @@ config :snarky,
     "snare" => 7,
     "overhead" => 8
   }
+
+config :nx, :default_backend, EXLA.Backend

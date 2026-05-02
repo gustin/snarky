@@ -21,8 +21,12 @@ defmodule Snarky.MixProject do
 
   defp deps do
     [
+      {:bumblebee, "~> 0.6"},
+      {:exla, "~> 0.9"},
+      {:ortex, "~> 0.1"},
       {:ex_osc, "~> 0.1"},
-      {:jason, "~> 1.4"}
+      {:jason, "~> 1.4"},
+      {:nx, "~> 0.9"}
     ]
   end
 

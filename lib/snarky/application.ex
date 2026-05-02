@@ -6,6 +6,9 @@ defmodule Snarky.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      {Nx.Serving,
+       serving: Snarky.Transcriber.serving(), name: Snarky.STT, batch_size: 1, batch_timeout: 100},
+      Snarky.VAD,
       Snarky.Speaker,
       Snarky.Session,
       Snarky.Executor.OSC,

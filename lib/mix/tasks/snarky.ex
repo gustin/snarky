@@ -14,15 +14,17 @@ defmodule Mix.Tasks.Snarky do
       Logger.configure(level: :debug)
     end
 
+    model = Application.get_env(:snarky, :stt_model, "distil-whisper/distil-large-v3")
+
     IO.puts("""
 
-    ╔══════════════════════════════════════╗
-    ║         🎸  Snarky  🎸              ║
-    ║   Voice-controlled studio assistant  ║
-    ╚═════════��════════════════════════════╝
+    Snarky
+    ------
+    Voice-controlled studio assistant
 
-    Listening mode: #{Application.get_env(:snarky, :listen_mode, :always)}
-    Whisper model:  #{Path.basename(Application.get_env(:snarky, :whisper_model, "unknown"))}
+    STT model:      #{model}
+    Listening mode:  #{Application.get_env(:snarky, :listen_mode, :always)}
+    VAD:             Silero (speech gating)
 
     Commands:  record, stop, play, mute, solo, arm...
     Questions: "Why does the bass sound muddy?"

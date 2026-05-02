@@ -14,15 +14,17 @@ defmodule Mix.Tasks.Snarky.Setup do
     Checking dependencies...
     """)
 
-    check_whisper()
     check_ffmpeg()
     check_claude()
-    check_model()
     check_say()
+    check_stt_model()
 
     IO.puts("""
 
     Setup complete. Run `mix snarky` to start.
+
+    The STT model downloads from HuggingFace on first run.
+    Silero VAD model downloads automatically on first run.
 
     Tips:
     - In Logic Pro, enable OSC: Preferences > Control Surfaces
@@ -31,51 +33,31 @@ defmodule Mix.Tasks.Snarky.Setup do
     """)
   end
 
-  defp check_whisper do
-    whisper_bin =
-      Application.get_env(:snarky, :whisper_bin, "/opt/homebrew/opt/whisper-cpp/bin/whisper-cli")
-
-    if File.exists?(whisper_bin) do
-      IO.puts("  ✓ whisper-cpp found at #{whisper_bin}")
-    else
-      IO.puts("  ✗ whisper-cpp not found. Install: brew install whisper-cpp")
-    end
-  end
-
   defp check_ffmpeg do
     case System.cmd("which", ["ffmpeg"], stderr_to_stdout: true) do
-      {path, 0} -> IO.puts("  ✓ ffmpeg found at #{String.trim(path)}")
-      _ -> IO.puts("  ✗ ffmpeg not found. Install: brew install ffmpeg")
+      {path, 0} -> IO.puts("  ok  ffmpeg found at #{String.trim(path)}")
+      _ -> IO.puts("  --  ffmpeg not found. Install: brew install ffmpeg")
     end
   end
 
   defp check_claude do
     case System.cmd("which", ["claude"], stderr_to_stdout: true) do
-      {path, 0} -> IO.puts("  ✓ claude CLI found at #{String.trim(path)}")
-      _ -> IO.puts("  ✗ claude CLI not found (needed for troubleshooting questions)")
-    end
-  end
-
-  defp check_model do
-    model = Application.get_env(:snarky, :whisper_model, "")
-
-    if model != "" and File.exists?(model) do
-      size = File.stat!(model).size |> div(1_000_000)
-      IO.puts("  �� Whisper model found (#{size} MB): #{Path.basename(model)}")
-    else
-      IO.puts("  ✗ Whisper model not found at #{model}")
-
-      IO.puts(
-        "    Download: curl -L https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin -o priv/models/ggml-base.en.bin"
-      )
+      {path, 0} -> IO.puts("  ok  claude CLI found at #{String.trim(path)}")
+      _ -> IO.puts("  --  claude CLI not found (needed for troubleshooting questions)")
     end
   end
 
   defp check_say do
     if File.exists?("/usr/bin/say") do
-      IO.puts("  ✓ macOS say command available")
+      IO.puts("  ok  macOS say command available")
     else
-      IO.puts("  ✗ macOS say command not found (are you on macOS?)")
+      IO.puts("  --  macOS say command not found (are you on macOS?)")
     end
+  end
+
+  defp check_stt_model do
+    model = Application.get_env(:snarky, :stt_model, "distil-whisper/distil-large-v3")
+    IO.puts("  ok  STT model configured: #{model}")
+    IO.puts("      (downloads from HuggingFace on first run, cached locally)")
   end
 end
