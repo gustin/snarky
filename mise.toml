@@ -1,10 +1,15 @@
 [tools]
 erlang = "27"
 elixir = "1.19"
+python = "3.12"
 
 [tasks.setup]
-description = "Install deps and verify environment"
-run = ["mix deps.get", "mix snarky.setup"]
+description = "Install all dependencies"
+run = [
+    "mix deps.get",
+    "uv sync",
+    "mix snarky.setup",
+]
 
 [tasks.start]
 description = "Start Snarky"
@@ -22,6 +27,10 @@ run = "mix format"
 description = "Compile with warnings as errors and check format"
 run = ["mix compile --warnings-as-errors", "mix format --check-formatted", "mix test"]
 
-[tasks."model:download"]
-description = "Download Whisper base.en model"
-run = "curl -L https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin -o priv/models/ggml-base.en.bin"
+[tasks."tts:test"]
+description = "Test TTS with Kokoro"
+run = 'uv run python -m mlx_audio.tts.generate --model "prince-canuma/Kokoro-82M" --text "Snarky is ready" --play'
+
+[tasks."tts:say"]
+description = "Speak text with Kokoro (pass text as argument)"
+run = 'uv run python -m mlx_audio.tts.generate --model "prince-canuma/Kokoro-82M" --text "$1" --play'

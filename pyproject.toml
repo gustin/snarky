@@ -1,0 +1,10 @@
+[project]
+name = "snarky-tts"
+version = "0.1.0"
+description = "TTS dependencies for Snarky studio assistant"
+requires-python = ">=3.11"
+dependencies = [
+    "mlx-audio>=0.4",
+    "misaki[en]>=0.9",
+    "num2words>=0.5",
+]

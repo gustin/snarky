@@ -28,6 +28,12 @@ snarky-*.tar
 # Audio temp files
 /tmp/audio/
 
+# Python virtual environment
+/.venv/
+
+# uv lock file
+/uv.lock
+
 # Planning docs (local working notes)
 /docs/plans/
 
