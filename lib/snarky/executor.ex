@@ -6,34 +6,17 @@ defmodule Snarky.Executor do
     Logger.info("Executing: #{cmd.action} on #{inspect(cmd.target)}")
 
     result =
-      case cmd.action do
-        action when action in [:play, :stop, :record, :pause, :rewind, :undo, :redo, :save] ->
-          Snarky.Executor.AppleScript.execute(cmd)
+      if Snarky.MCU.connected?() do
+        case Snarky.Executor.MCU.execute(cmd) do
+          {:error, :fallback_to_applescript} ->
+            Logger.debug("MCU fallback to AppleScript for #{cmd.action}")
+            execute_legacy(cmd)
 
-        action when action in [:mute, :unmute, :solo, :unsolo, :arm, :disarm] ->
-          Snarky.Executor.AppleScript.execute(cmd)
-
-        action when action in [:set_volume, :volume_up, :volume_down, :pan] ->
-          Snarky.Executor.OSC.execute(cmd)
-
-        :set_tempo ->
-          Snarky.Executor.AppleScript.execute(cmd)
-
-        :loop ->
-          Snarky.Executor.AppleScript.execute(cmd)
-
-        action when action in [:add_effect, :remove_effect] ->
-          Snarky.Executor.AppleScript.execute(cmd)
-
-        :bounce ->
-          Snarky.Executor.AppleScript.execute(cmd)
-
-        :export ->
-          Snarky.Executor.AppleScript.execute(cmd)
-
-        _ ->
-          Logger.warning("Unknown action: #{cmd.action}")
-          {:error, :unknown_action}
+          other ->
+            other
+        end
+      else
+        execute_legacy(cmd)
       end
 
     case result do
@@ -47,5 +30,14 @@ defmodule Snarky.Executor do
         Logger.error("Execution failed: #{inspect(reason)}")
         {:error, reason}
     end
+  end
+
+  defp execute_legacy(%Command{action: action} = cmd)
+       when action in [:set_volume, :volume_up, :volume_down, :pan] do
+    Snarky.Executor.OSC.execute(cmd)
+  end
+
+  defp execute_legacy(%Command{} = cmd) do
+    Snarky.Executor.AppleScript.execute(cmd)
   end
 end

@@ -11,6 +11,7 @@ defmodule Snarky.Application do
       Snarky.VAD,
       Snarky.Speaker,
       Snarky.Session,
+      Snarky.MCU,
       Snarky.Executor.OSC,
       Snarky.Listener
     ]
