@@ -34,6 +34,14 @@ snarky-*.tar
 # uv lock file
 /uv.lock
 
+# Generated audio files
+*.wav
+
+# Obsidian
+/docs/.obsidian/
+
 # Planning docs (local working notes)
 /docs/plans/
 
+.DS_Store
+.obsidian

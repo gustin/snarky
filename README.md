@@ -1,86 +1,99 @@
 # Snarky
 
-Voice-controlled studio assistant for Tascam Model 12 and Logic Pro,
-built in Elixir. Speak commands while playing.
+<p align="center">
+  <img src="images/snarky.png" alt="Snarky" width="300">
+</p>
 
-## Hardware
+Your studio assistant who actually listens. Talk to your DAW
+while your hands are busy doing something useful.
 
-- Tascam Model 12 (USB to Mac, DAW control mode)
-- Benson tube amp
-- Behringer mic
-- Mac with built-in mic (for voice commands)
+Snarky sits between you and Logic Pro, translating whatever you
+mumble into actual mixer commands. Ask a dumb question about
+frequencies, get a real answer. Forget which track the kick is
+on, just say "kick." Snarky knows.
 
-## Architecture
+## What You Need
+
+- Tascam Model 12 (USB, DAW control mode)
+- A Mac that isn't from 2015
+- Logic Pro
+- An instrument and something to say
+
+## How It Works
 
 ```mermaid
 graph LR
-    Mic[Mac Mic] --> Whisper[Whisper STT]
-    Whisper --> Router[Command Router]
+    Mic[Your Voice] --> STT[Speech Recognition]
+    STT --> Router[Command Router]
 
-    Router -->|transport, tracks| AS[AppleScript]
-    Router -->|faders, pans| OSC[OSC]
-    Router -->|questions| Claude[claude -p]
+    Router -->|"mute the bass"| MCU[Mackie Control MIDI]
+    Router -->|"volume up"| OSC[OSC]
+    Router -->|"why is it muddy?"| Claude[Ask Claude]
 
-    AS --> Logic[Logic Pro]
+    MCU <--> Logic[Logic Pro]
     OSC --> Logic
-    Claude --> Say[macOS say]
-    AS --> Say
-    OSC --> Say
+    Claude --> TTS[Kokoro TTS]
+    MCU --> TTS
 
-    Logic <-->|USB / Mackie Control| Tascam[Tascam Model 12]
+    Logic <-->|USB| Tascam[Tascam Model 12]
 ```
 
-Transport and track commands are parsed deterministically.
-Mixer operations go through OSC. Engineering questions like
-"why is the bass muddy?" route to Claude via your Max subscription.
+Commands like "record track 8" get parsed deterministically.
+No LLM in the loop, no latency, no hallucinated fader moves.
 
-## Requirements
+Questions like "why does the bass sound muddy?" route to Claude
+with your actual session state as context.
 
-- Elixir 1.19+
-- whisper-cpp
-- ffmpeg
-- Logic Pro with OSC enabled
-- Tascam Model 12 connected via USB
-
-## Setup
+## Get Going
 
 ```sh
-mise install
-mix setup
-mix snarky.setup
+mise install      # erlang, elixir, python
+mise setup        # elixir deps, python deps, environment check
+mise start        # launch snarky
 ```
 
-## Usage
+Pick up your instrument. Talk.
 
 ```sh
-mix snarky
+mise tts:test     # hear kokoro say "snarky is ready"
+mise check        # compile strict, format, test
+mise test         # just tests
+mise fmt          # format code
 ```
 
-Then pick up your instrument and talk.
+## Tell Snarky What To Do
 
-## Voice Commands
+**Transport:** record, stop, play, pause, rewind, undo, redo
 
-Transport: record, stop, play, pause, rewind, undo, redo
+**Tracks:** "mute track 3", "solo the bass", "arm drums"
 
-Tracks: "mute track 3", "solo the bass", "arm drums"
+**Mixing:** "volume up track 1", "pan track 2 left"
 
-Mixing: "volume up track 1", "pan track 2 left"
+**Effects:** "add reverb to track 3", "remove delay from track 5"
 
-Effects: "add reverb to track 3", "remove delay from track 5"
+**Session:** "set tempo to 120", "loop bar 4 to 12", "save", "bounce"
 
-Session: "set tempo to 120", "loop bar 4 to bar 12", "save", "bounce"
+**Questions:** "why does the bass sound muddy?", "what frequency is clashing?"
 
-Questions: "why does the bass sound muddy?", "what frequency is clashing?"
-
-Track aliases are configurable in `config/config.exs`.
+Track aliases map names to numbers. "the bass" means track 2
+because you said so in `config/config.exs`.
 
 ## Configuration
 
-Edit `config/config.exs` to set:
+`config/config.exs` controls everything:
 
-- Track aliases (map names like "guitar" to track numbers)
-- Whisper model path and binary location
-- OSC host and port
+- Track aliases ("guitar" = 1, "drums" = 5, whatever you want)
+- TTS engine (`:kokoro` or `:say` if you like robots)
 - Listening mode (`:always` or `:wake_word`)
 - Wake word (default: "hey snarky")
-- Voice and speech rate for spoken feedback
+- Audio device (finds your mic by name, survives unplugging)
+
+## Architecture
+
+Elixir/OTP supervision tree. Speech recognition runs in-process
+via Bumblebee. Silero VAD gates the recognizer so it only burns
+cycles when you're actually talking. Mackie Control protocol
+over virtual MIDI for bidirectional DAW communication. Kokoro
+neural TTS through mlx-audio on Apple Silicon.
+
+The full architecture is in [docs/architecture.md](docs/architecture.md).
