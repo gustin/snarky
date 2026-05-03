@@ -161,7 +161,7 @@ defmodule SnarkyWeb.DashboardLive do
       <!-- Transport Bar -->
       <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--surface-alt);">
         <div style="display: flex; gap: 6px; align-items: center;">
-          <img src="/images/snarky.png" style="width: 48px; height: 48px; border-radius: 8px;" />
+          <img src="/images/snarky.png" style="width: 48px; height: 48px; border-radius: 10px; border: 1px solid var(--surface-lit);" />
           <button phx-click="transport" phx-value-action="rewind" class="transport-btn">⏮</button>
           <button phx-click="transport" phx-value-action="stop" class="transport-btn">⏹</button>
           <button phx-click="transport" phx-value-action="play" class="transport-btn play-btn">▶</button>
